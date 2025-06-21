@@ -1,0 +1,9 @@
+fetch_pikachu() {
+  url="https://pokeapi.co/api/v2/pokemon/pikachu"
+  response=$(curl -s -w "%{http_code}" -o data.json "$url")
+  if [ "$response" -ne 200 ]; then
+    echo "[Error] Failed to fetch Pikachu data. Status code: $response" >> errors.txt
+    rm -f data.json
+    exit 1
+  fi
+}
