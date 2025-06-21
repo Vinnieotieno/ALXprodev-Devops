@@ -1,0 +1,17 @@
+parallel_fetch() {
+  mkdir -p pokemon_data
+  pokemons=(bulbasaur ivysaur venusaur charmander charmeleon)
+  for name in "${pokemons[@]}"; do
+    (
+      echo "Fetching data for $name..."
+      curl -s -o "pokemon_data/${name}.json" "https://pokeapi.co/api/v2/pokemon/$name"
+      if [ $? -eq 0 ]; then
+        echo "Saved data to pokemon_data/${name}.json"
+      else
+        echo "[Error] Failed to fetch $name" >> errors.txt
+      fi
+    ) &
+  done
+  wait
+  echo "All fetches completed."
+}
