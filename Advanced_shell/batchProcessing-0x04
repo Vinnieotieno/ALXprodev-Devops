@@ -12,6 +12,15 @@ parallel_fetch() {
       fi
     ) &
   done
+
   wait
   echo "All fetches completed."
+
+  echo "Listing all background jobs:"
+  jobs
+
+  echo "Killing any stray background processes (if any)..."
+  for job in $(jobs -p); do
+    kill "$job" 2>/dev/null || true
+  done
 }
