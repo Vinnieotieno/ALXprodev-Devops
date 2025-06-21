@@ -1,16 +1,24 @@
-batch_fetch() {
+batch_fetch_with_retry() {
   mkdir -p pokemon_data
   pokemons=(bulbasaur ivysaur venusaur charmander charmeleon)
+
   for name in "${pokemons[@]}"; do
     echo "Fetching data for $name..."
-    url="https://pokeapi.co/api/v2/pokemon/$name"
-    response=$(curl -s -w "%{http_code}" -o "pokemon_data/${name}.json" "$url")
-    if [ "$response" -eq 200 ]; then
-      echo "Saved data to pokemon_data/${name}.json"
-    else
-      echo "[Error] Failed to fetch $name. Status code: $response" >> errors.txt
+    attempt=0
+    success=false
+    while [ $attempt -lt 3 ]; do
+      response=$(curl -s -w "%{http_code}" -o "pokemon_data/${name}.json" "https://pokeapi.co/api/v2/pokemon/$name")
+      if [ "$response" -eq 200 ]; then
+        echo "Saved data to pokemon_data/${name}.json"
+        success=true
+        break
+      fi
+      attempt=$((attempt + 1))
+      sleep 2
+    done
+    if [ "$success" = false ]; then
+      echo "[Error] Failed to fetch $name after 3 attempts" >> errors.txt
       rm -f "pokemon_data/${name}.json"
     fi
-    sleep 1
   done
 }
